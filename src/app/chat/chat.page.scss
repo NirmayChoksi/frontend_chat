@@ -1,0 +1,115 @@
+.margin-right {
+  max-width: 40%;
+  margin-right: auto;
+  background-color: var(--ion-color-secondary);
+  color: white;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.margin-left {
+  max-width: 40%;
+  margin-left: auto;
+  background-color: var(--ion-color-primary);
+  color: white;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.border-bottom {
+  border-bottom: 1px solid rgb(221, 218, 218, 0.6);
+  cursor: pointer;
+}
+
+.deleted-message {
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.chat-box {
+  .messages-container {
+    height: calc(100vh - 107px);
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column-reverse;
+    .messages {
+      display: flex;
+      flex-direction: column;
+    }
+    &::-webkit-scrollbar-track {
+      -webkit-box-shadow: none;
+      border-radius: 10px;
+      background-color: none;
+    }
+
+    &::-webkit-scrollbar {
+      width: 12px;
+      background-color: none;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      border-radius: 10px;
+      -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+      background-color: #393939bd;
+      height: 10px;
+      scroll-behavior: smooth;
+    }
+  }
+
+  .chat-container {
+    padding: 8px;
+    background-color: #0054e925;
+    display: flex;
+    flex-direction: column;
+    .img-container {
+      display: flex;
+      gap: 8px;
+      .img {
+        width: 80px;
+        height: 80px;
+        border-radius: 4px;
+      }
+      ion-fab {
+        top: 4px;
+        right: 4px;
+        ion-fab-button {
+          width: 20px;
+          height: 20px;
+          margin: 0;
+          .trash-icon {
+            width: 0.5em;
+            height: 0.5em;
+          }
+        }
+      }
+    }
+    .input-container {
+      display: flex;
+      width: 100%;
+      gap: 8px;
+      .chat-input {
+        // background-color: #0054e950;
+        width: 95%;
+        .input {
+          border-radius: 20px;
+          min-height: unset;
+          height: 35px;
+          .icon {
+          }
+        }
+      }
+      .button-container {
+        .button {
+          min-height: unset;
+          height: 35px;
+          margin: 0;
+          .icon {
+          }
+        }
+      }
+    }
+  }
+}

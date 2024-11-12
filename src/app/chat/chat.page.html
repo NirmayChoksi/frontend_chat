@@ -1,0 +1,71 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>{{receiver}}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">{{receiver}}</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  <div class="chat-box">
+    <div class="messages-container">
+      <div class="messages">
+        @for (message of messages; track $index) {
+        @if (message.status === "ACTIVE") {
+        <p [class]="message.from === sender ? 'margin-left' : 'margin-right'" (click)="deleteMessage(message)">
+          {{ message.content }}
+        </p>
+        } @else {
+        <p [class]="message.from === sender ? 'margin-left' : 'margin-right'" class="deleted-message" (click)="deleteMessage(message)">
+          <ion-icon name="ban-outline"></ion-icon>
+          {{
+            message.from === sender
+              ? "You deleted this message"
+              : "Message has been deleted"
+          }}
+        </p>
+        } } @if (showTyping) {
+        <ion-spinner name="dots"></ion-spinner>
+        }
+      </div>
+    </div>
+    <div class="chat-container">
+      @if (files.length > 0) {
+      <div class="img-container">
+        @for (img of files; track $index) {
+        <div style="position: relative">
+          <img [src]="img" class="img" />
+          <ion-fab slot="fixed" vertical="top" horizontal="end">
+            <ion-fab-button size="small" color="danger" (click)="onDelete($index)">
+              <ion-icon name="trash-outline" class="trash-icon"></ion-icon>
+            </ion-fab-button>
+          </ion-fab>
+        </div>
+        }
+      </div>
+      }
+
+      <div class="input-container">
+        <div class="chat-input">
+          <ion-input appImageUploader [fileType]="'image/jpeg'" (dropFiles)="onDropFiles($event)" [(ngModel)]="message" placeholder="Message" (input)="onTyping()" fill="outline" class="mr-8" shape="round" class="input" mode="md">
+            <ion-button slot="end" fill="clear" (click)="triggerFileInput()">
+              <ion-icon name="attach" slot="icon-only" class="icon"></ion-icon>
+            </ion-button>
+            <input type="file" #fileInput (change)="onFileChange($event)" multiple hidden />
+          </ion-input>
+        </div>
+        <div class="button-container">
+          <ion-button (click)="sendPrivateMessage()" class="button" fill="clear">
+            <ion-icon name="send" class="icon" slot="icon-only"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+</ion-content>

@@ -1,0 +1,14 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Login</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div>
+    <ion-input placeholder="Username" fill="outline" shape="round" mode="md" [(ngModel)]="userName"></ion-input>
+    <ion-button (click)='onClick()'>
+      Login
+    </ion-button>
+  </div>
+</ion-content>
