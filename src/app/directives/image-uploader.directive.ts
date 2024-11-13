@@ -7,6 +7,7 @@ import {
   Output,
 } from '@angular/core';
 import { ImageUploadService } from '../services/image-upload.service';
+import { ToastService } from '../services/toast.service';
 
 enum DropColor {
   Default = '#ffffff', // Default color
@@ -17,7 +18,10 @@ enum DropColor {
   selector: '[appImageUploader]',
 })
 export class ImageUploaderDirective {
-  constructor(private imageUploadService: ImageUploadService) {}
+  constructor(
+    private imageUploadService: ImageUploadService,
+    private toastService: ToastService
+  ) {}
 
   @Output() dropFiles: EventEmitter<string[]> = new EventEmitter();
   @Input() fileType = '';
@@ -30,31 +34,10 @@ export class ImageUploaderDirective {
   }
 
   @HostListener('dragleave', ['$event']) public dragLeave(event: DragEvent) {
-    console.log('drag leave');
     event.preventDefault();
     event.stopPropagation();
     this.backgroundColor = DropColor.Default;
   }
-
-  // @HostListener('drop', ['$event']) public drop(event: DragEvent) {
-  //   event.preventDefault();
-  //   event.stopPropagation();
-  //   this.backgroundColor = DropColor.Default;
-
-  //   let fileList = event.dataTransfer?.files || [];
-  //   let files: string[] = [];
-  //   for (let i = 0; i < fileList.length; i++) {
-  //     const fr = new FileReader();
-  //     fr.onload = () => {
-  //       const dataUrl = fr.result?.toString();
-  //       files.push(dataUrl as string);
-  //     };
-  //     fr.readAsDataURL(fileList[i]);
-  //   }
-  //   if (files.length > 0) {
-  //     this.dropFiles.emit(files);
-  //   }
-  // }
 
   @HostListener('drop', ['$event']) public drop(event: DragEvent) {
     event.preventDefault();
@@ -62,21 +45,41 @@ export class ImageUploaderDirective {
     this.backgroundColor = DropColor.Default;
 
     let fileList = event.dataTransfer?.files || [];
-    let files: File[] = [];
+    const files: File[] = Array.from(fileList);
 
-    for (let i = 0; i < fileList.length; i++) {
-      files.push(fileList[i]);
+    if (this.fileType && !this.isValidFileType(files)) {
+      this.toastService.showToast({
+        message: 'Invalid file type!',
+        duration: 2000,
+        color: 'danger',
+      });
+      return;
     }
 
     if (files.length > 0) {
-      this.imageUploadService.uploadFile(files).subscribe({
-        next: (response) => {
-          this.dropFiles.emit(response.files);
-        },
-        error: (error) => {
-          console.error('File upload failed', error);
-        },
-      });
+      this.uploadFiles(files);
     }
+  }
+
+  private isValidFileType(files: File[]): boolean {
+    return files.every((file) => file.type.startsWith(this.fileType));
+  }
+
+  private uploadFiles(files: File[]): void {
+    this.imageUploadService.uploadFile(files).subscribe({
+      next: (response) => {
+        if (response.files.length > 0) {
+          this.dropFiles.emit(response.files);
+        }
+      },
+      error: (error) => {
+        console.error('File upload failed', error);
+        this.toastService.showToast({
+          message: 'File upload failed. Please try again.',
+          duration: 2000,
+          color: 'danger',
+        });
+      },
+    });
   }
 }

@@ -1,44 +1,102 @@
-.margin-right {
-  max-width: 40%;
-  margin-right: auto;
-  background-color: var(--ion-color-secondary);
-  color: white;
-  padding: 10px;
-  border-radius: 10px;
-}
-
-.margin-left {
-  max-width: 40%;
-  margin-left: auto;
-  background-color: var(--ion-color-primary);
-  color: white;
-  padding: 10px;
-  border-radius: 10px;
-}
-
-.border-bottom {
-  border-bottom: 1px solid rgb(221, 218, 218, 0.6);
-  cursor: pointer;
-}
-
-.deleted-message {
-  font-style: italic;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.chat-box {
+.chat-container {
   .messages-container {
-    height: calc(100vh - 107px);
     overflow-y: auto;
     padding: 16px;
     display: flex;
     flex-direction: column-reverse;
+    gap: 4px;
+
     .messages {
       display: flex;
       flex-direction: column;
+      gap: 4px;
+
+      .date-container {
+        display: flex;
+        justify-content: center;
+
+        ion-chip {
+          --background: #e1e1e1;
+          pointer-events: none;
+          width: fit-content;
+          text-align: center;
+        }
+
+        .active-date {
+          position: fixed;
+          z-index: 10;
+          top: 66px;
+          background-color: #007aff;
+          color: white;
+          padding: 6px 12px;
+        }
+      }
+
+      .sender-message-container,
+      .receiver-message-container {
+        display: flex;
+        gap: 8px;
+        max-width: 40%;
+        .avatar-container {
+          height: 100%;
+          ion-avatar {
+            height: 30px;
+            width: 30px;
+          }
+        }
+        .chat-bubble-container {
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+          .chat-bubble {
+            padding: 12px;
+            border-radius: 8px;
+            width: fit-content;
+
+            &.sender {
+              background-color: #4444a6;
+              color: white;
+            }
+
+            &.receiver {
+              background-color: #e1e1e1;
+              color: black;
+            }
+          }
+          .deleted-message {
+            font-style: italic;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+          }
+          .sender-border-radius {
+            border-top-right-radius: 0;
+          }
+          .receiver-border-radius {
+            border-top-left-radius: 0;
+          }
+          .sender-info-container,
+          .receiver-info-container {
+            display: flex;
+            gap: 8px;
+          }
+        }
+      }
+
+      .sender-message-container {
+        flex-direction: row-reverse;
+        margin-left: auto;
+        .sender-info-container {
+          flex-direction: row-reverse;
+        }
+      }
+
+      .receiver-message-container {
+        margin-right: auto;
+      }
     }
+
     &::-webkit-scrollbar-track {
       -webkit-box-shadow: none;
       border-radius: 10px;
@@ -58,27 +116,31 @@
       scroll-behavior: smooth;
     }
   }
-
-  .chat-container {
+  .action-container {
     padding: 8px;
     background-color: #0054e925;
     display: flex;
     flex-direction: column;
+
     .img-container {
       display: flex;
       gap: 8px;
+
       .img {
         width: 80px;
         height: 80px;
         border-radius: 4px;
       }
+
       ion-fab {
         top: 4px;
         right: 4px;
+
         ion-fab-button {
           width: 20px;
           height: 20px;
           margin: 0;
+
           .trash-icon {
             width: 0.5em;
             height: 0.5em;
@@ -86,30 +148,39 @@
         }
       }
     }
+
     .input-container {
       display: flex;
       width: 100%;
       gap: 8px;
+
       .chat-input {
-        // background-color: #0054e950;
         width: 95%;
+
         .input {
           border-radius: 20px;
           min-height: unset;
           height: 35px;
+
           .icon {
           }
         }
       }
-      .button-container {
-        .button {
+
+      .send-button-container {
+        ion-button {
           min-height: unset;
           height: 35px;
           margin: 0;
+
           .icon {
           }
         }
       }
     }
   }
+}
+
+.relative {
+  position: relative;
 }

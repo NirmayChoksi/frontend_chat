@@ -1,7 +1,5 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { ToastController } from '@ionic/angular';
+import { Component, OnInit } from '@angular/core';
 
-import { ImageUploadService } from '../services/image-upload.service';
 import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
