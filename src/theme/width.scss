@@ -1,0 +1,21 @@
+$width-values: ();
+@for $i from 0 through 500 {
+  $width-values: map-merge($width-values, ($i: $i * 1px));
+}
+
+@each $key, $value in $width-values {
+  .w-#{$key} {
+    width: $value;
+  }
+}
+
+$width-values-percent: ();
+@for $i from 0 through 100 {
+  $width-values-percent: map-merge($width-values-percent, ($i: $i * 1%));
+}
+
+@each $key, $value in $width-values-percent {
+  .wp-#{$key} {
+    width: $value;
+  }
+}

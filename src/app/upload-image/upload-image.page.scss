@@ -1,0 +1,20 @@
+.img-container {
+  position: relative;
+
+  img {
+    object-fit: contain;
+  }
+}
+
+  .caption {
+    position: relative;
+    transition: transform 0.3s ease-in-out;
+  }
+  // ::ng-deep .input-fill-outline.sc-ion-input-md-h:focus {
+  //   transform: translateY(-60px) !important;
+  //   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+  //   outline: none !important;
+  // }
+// ion-content{
+//   --keyboard-offset: 0 !important;
+// }

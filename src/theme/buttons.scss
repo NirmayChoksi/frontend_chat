@@ -1,0 +1,48 @@
+ion-button {
+  --border-radius: 10px;
+  --padding-top: 14px;
+  --padding-bottom: 14px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+
+  font-weight: normal;
+
+  text-transform: none;
+  min-width: unset;
+}
+
+.subtle {
+  --background: var(--ion-color-subtle-button);
+  --background-hover: var(--ion-color-primary);
+
+  --color: var(--ion-color-primary);
+  --color-hover: var(--ion-color-white);
+}
+
+.ghost-button {
+  --background: transparent;
+  --background-hover: var(--ion-color-contained-button-hover);
+
+  --background-hover-opacity: 100%;
+  --background-activated-opacity: 100%;
+
+  --color: var(--ion-color-primary);
+  --color-hover: var(--ion-color-primary);
+
+  --box-shadow: none;
+}
+
+.outline-button {
+  --background: transparent;
+  --background-hover: var(--ion-color-contained-button-hover);
+  --background-hover-opacity: 100%;
+  --background-activated-opacity: 100%;
+
+  --box-shadow: none;
+
+  --border-color: var(--ion-color-primary);
+  --border-width: 1px;
+  --border-style: solid;
+
+  --color: var(--ion-color-primary);
+}

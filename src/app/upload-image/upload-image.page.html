@@ -1,0 +1,59 @@
+@if (images.length < 1) {
+  <ion-header [translucent]="true">
+    <ion-toolbar>
+      <ion-title>upload-imageeeeeeee</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-content [fullscreen]="true">
+    <ion-header collapse="condense">
+      <ion-toolbar>
+        <ion-title size="large">upload-imagee</ion-title>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-button (click)="selectImages()">Take picture</ion-button>
+    <input
+      type="file"
+      id="imageInput"
+      accept="image/*"
+      (change)="pickImage($event)"
+      multiple
+      style="display: none"
+    />
+  </ion-content>
+} @else {
+  <ion-toolbar>
+    <ion-buttons slot="end">
+      <ion-button>
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-content>
+    <swiper-container
+      [pagination]="true"
+      class="swiper"
+      (slideChangeTransitionEnd)="onSlideChange($event)"
+      #swiper
+    >
+      @for (img of images; track $index) {
+        <swiper-slide>
+          <div class="img-container hp-100">
+            <img [src]="img" alt="Selected Image" class="hp-100 wp-100" />
+          </div>
+        </swiper-slide>
+      }
+    </swiper-container>
+    <div class="p-10">
+      <ion-input
+        class="caption"
+        [class.caption-active]="showKeyboard"
+        mode="md"
+        fill="outline"
+        placeholder="Enter caption"
+        [(ngModel)]="captions[activeIndex]"
+      ></ion-input>
+    </div>
+  </ion-content>
+}

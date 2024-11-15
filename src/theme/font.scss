@@ -1,0 +1,18 @@
+$weight-values: (100, 200, 300, 400, 500, 600);
+
+@each $weight in $weight-values {
+  .fw-#{$weight} {
+    font-weight: $weight;
+  }
+}
+
+$font-values: ();
+@for $i from 0 through 50 {
+  $font-values: map-merge($font-values, ($i: $i * 1px));
+}
+
+@each $key, $value in $font-values {
+  .fs-#{$key} {
+    font-size: $value;
+  }
+}

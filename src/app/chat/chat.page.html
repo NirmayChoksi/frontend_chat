@@ -1,121 +1,248 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      {{ receiver }}
-    </ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
+@if (!this.files.length && !displayImages) {
+  <ion-header [translucent]="true">
     <ion-toolbar>
-      <ion-title size="large">
+      <ion-title>
         {{ receiver }}
       </ion-title>
     </ion-toolbar>
   </ion-header>
-  <div class="chat-container">
-    <div class="messages-container" [ngStyle]="{
-        height: files.length ? 'calc(100vh - 191px)' : 'calc(100vh - 107px)'
-      }" (scroll)="onScroll($event)" #messagesContainer>
-      <div class="messages">
-        @for(dateGroup of groupedMessages | keyvalue; track dateGroup.key){
-        <div class="date-container" [attr.id]="'date-' + dateGroup.key">
-          <ion-chip [ngClass]="{ 'active-date': dateGroup.key === currentVisibleDate }">
-            @if (dateGroup.key===today) { Today }@else {
-            {{ dateGroup.key | date : "EEE, MMM d, yyyy" }}
-            }
-          </ion-chip>
-        </div>
-        @for(messageGroup of dateGroup.value;track $index){
-        <div [class]="
-            messageGroup[0].from === sender
-              ? 'sender-message-container'
-              : 'receiver-message-container'
-          ">
-          <div class="avatar-container">
-            <ion-avatar>
-              <img alt="Silhouette of a person's head" src="https://ionicframework.com/docs/img/demos/avatar.svg" />
-            </ion-avatar>
-          </div>
-          <div class="chat-bubble-container">
-            @for(message of messageGroup;track $index){ @if ($index===0) {
-            <div [class]="
-                messageGroup[0].from === sender
-                  ? 'sender-info-container'
-                  : 'receiver-info-container'
-              ">
-              <span class="name">
-                {{ messageGroup[0].from }}</span>
-              <span class="timestamp">
-                {{
-                messageGroup[0].createdAt | date : "shortTime"
-              }}</span>
-            </div>
-            }
-            <div class="chat-bubble" [class]="message.from === sender ? 'sender' : 'receiver'" (click)="deleteMessage(message)" [ngClass]="{
-                'deleted-message': message.status === 'DELETED',
-                'sender-border-radius': $index === 0 && message.from === sender,
-                'receiver-border-radius':
-                  $index === 0 && message.from !== sender
-              }">
-              @if (message.status==='ACTIVE') {
-              <span>
-                {{ message.content }}</span> } @else {
-              <ion-icon name="ban-outline"></ion-icon>
-              {{
-                message.from === sender
-                  ? "You deleted this message"
-                  : "Message has been deleted"
-              }}
-              }
-            </div>
-            }
-          </div>
-        </div>
-        } } @if (showTyping) {
-        <ion-spinner name="dots"></ion-spinner>
-        }
-      </div>
-    </div>
-    <div class="action-container">
-      @if (files.length > 0) {
-      <div class="img-container">
-        @for (img of files; track $index) {
-        <div class="relative">
-          <img [src]="img" class="img" />
-          <ion-fab slot="fixed" vertical="top" horizontal="end">
-            <ion-fab-button size="small" color="danger" (click)="onDelete($index)">
-              <ion-icon name="trash-outline" class="trash-icon"></ion-icon>
-            </ion-fab-button>
-          </ion-fab>
-        </div>
-        }
-      </div>
-      }
 
-      <div class="input-container">
-        <div class="chat-input">
-          <ion-input appImageUploader [fileType]="'image/jpeg'" (dropFiles)="onDropFiles($event)" [(ngModel)]="message" placeholder="Message" (input)="onTyping()" fill="outline" shape="round" class="input" mode="md">
-            @if (isDesktop) {
-            <ion-button slot="end" fill="clear" (click)="triggerFileInput()">
-              <ion-icon name="attach" slot="icon-only" class="icon"></ion-icon>
-            </ion-button>
-            }@else {
-            <ion-button id="open-action-sheet" slot="end" fill="clear">
-              <ion-icon name="attach" slot="icon-only" class="icon"></ion-icon>
-            </ion-button>
-            <ion-action-sheet trigger="open-action-sheet" [buttons]="actionSheetButtons" (didDismiss)="onSelect($event)"></ion-action-sheet>
+  <ion-content [fullscreen]="true">
+    <ion-header collapse="condense">
+      <ion-toolbar>
+        <ion-title size="large">
+          {{ receiver }}
+        </ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <div class="chat-container">
+      <div
+        class="messages-container"
+        [ngStyle]="{
+          height: files.length ? 'calc(100vh - 191px)' : 'calc(100vh - 107px)',
+        }"
+        (scroll)="onScroll($event)"
+        #messagesContainer
+      >
+        <div class="messages">
+          @for (dateGroup of groupedMessages | keyvalue; track dateGroup.key) {
+            <div class="date-container" [attr.id]="'date-' + dateGroup.key">
+              <ion-chip
+                [ngClass]="{
+                  'active-date': dateGroup.key === currentVisibleDate,
+                }"
+              >
+                @if (dateGroup.key === today) {
+                  Today
+                } @else {
+                  {{ dateGroup.key | date: "EEE, MMM d, yyyy" }}
+                }
+              </ion-chip>
+            </div>
+            @for (messageGroup of dateGroup.value; track $index) {
+              <div
+                class="main-container"
+                [class]="
+                  messageGroup[0].from === sender
+                    ? 'justify-content-end'
+                    : 'justify-content-start'
+                "
+              >
+                <div
+                  [class]="
+                    messageGroup[0].from === sender
+                      ? 'sender-message-container'
+                      : 'receiver-message-container'
+                  "
+                >
+                  <div class="avatar-container">
+                    <ion-avatar>
+                      <img
+                        alt="Silhouette of a person's head"
+                        src="https://ionicframework.com/docs/img/demos/avatar.svg"
+                      />
+                    </ion-avatar>
+                  </div>
+                  <div
+                    class="chat-bubble-container"
+                    [class]="
+                      messageGroup[0].from === sender
+                        ? 'align-items-end'
+                        : 'align-items-start'
+                    "
+                  >
+                    @for (message of messageGroup; track $index) {
+                      @if ($index === 0) {
+                        <div
+                          [class]="
+                            messageGroup[0].from === sender
+                              ? 'sender-info-container'
+                              : 'receiver-info-container'
+                          "
+                        >
+                          <span class="name"> {{ messageGroup[0].from }}</span>
+                          <span class="timestamp">
+                            {{
+                              messageGroup[0].createdAt | date: "shortTime"
+                            }}</span
+                          >
+                        </div>
+                      }
+                      <div
+                        class="chat-bubble"
+                        [class]="
+                          message.from === sender ? 'sender' : 'receiver'
+                        "
+                        (click)="deleteMessage(message)"
+                        [ngClass]="{
+                          'deleted-message': message.status === 'DELETED',
+                          'sender-border-radius':
+                            $index === 0 && message.from === sender,
+                          'receiver-border-radius':
+                            $index === 0 && message.from !== sender,
+                          'image-container': message.imageUrl.length >= 4,
+                        }"
+                      >
+                        @if (message.status === "ACTIVE") {
+                          @if (message.imageUrl.length === 1) {
+                            <img
+                              [src]="message.imageUrl[0]"
+                              alt="Image not found."
+                              class="uploaded-image"
+                              (click)="showImages(message.imageUrl[0])"
+                            />
+                          } @else if (message.imageUrl.length >= 4) {
+                            @for (img of message.imageUrl; track $index) {
+                              <img
+                                [src]="img"
+                                alt="Image not found."
+                                (click)="showImages(img)"
+                              />
+                            }
+                          }
+                          @if (message.content) {
+                            <span>
+                              {{ message.content }}
+                            </span>
+                          }
+                        } @else {
+                          <ion-icon name="ban-outline"></ion-icon>
+                          <span>
+                            {{
+                              message.from === sender
+                                ? "You deleted this message"
+                                : "Message has been deleted"
+                            }}
+                          </span>
+                        }
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
             }
-            <input type="file" #fileInput (change)="onFileChange($event)" multiple hidden />
-          </ion-input>
+          }
+          @if (showTyping) {
+            <ion-spinner name="dots"></ion-spinner>
+          }
         </div>
-        <div class="send-button-container">
-          <ion-button (click)="sendPrivateMessage()" fill="clear">
-            <ion-icon name="send" class="icon" slot="icon-only"></ion-icon>
-          </ion-button>
+      </div>
+      <div class="action-container">
+        <div class="input-container">
+          <div class="chat-input">
+            <ion-input
+              appImageUploader
+              [fileType]="'image/jpeg'"
+              [(ngModel)]="message"
+              placeholder="Message"
+              (input)="onTyping()"
+              fill="outline"
+              shape="round"
+              class="input"
+              mode="md"
+            >
+              <ion-button id="open-action-sheet" slot="end" fill="clear">
+                <ion-icon
+                  name="attach"
+                  slot="icon-only"
+                  class="icon"
+                ></ion-icon>
+              </ion-button>
+              <ion-action-sheet
+                trigger="open-action-sheet"
+                [buttons]="actionSheetButtons"
+                (didDismiss)="onSelect($event)"
+              ></ion-action-sheet>
+            </ion-input>
+          </div>
+          <div class="send-button-container">
+            <ion-button (click)="sendPrivateMessage()" fill="clear">
+              <ion-icon name="send" class="icon" slot="icon-only"></ion-icon>
+            </ion-button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-</ion-content>
+  </ion-content>
+} @else {
+  <ion-toolbar>
+    @if (!displayImages) {
+      <ion-buttons slot="start">
+        <ion-button (click)="onDeleteImage(activeIndex)">
+          <ion-icon name="trash-outline" class="trash-icon"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    }
+    <ion-buttons slot="end">
+      <ion-button (click)="onClose()">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-content>
+    <div class="swiper">
+      <swiper-container init="false" #swiper>
+        @for (file of files; track $index) {
+          <swiper-slide>
+            <div class="image-container">
+              <img [src]="file.uri" alt="Selected Image" />
+            </div>
+          </swiper-slide>
+        }
+      </swiper-container>
+      @if (!displayImages) {
+        <div class="input-container">
+          <div class="chat-input">
+            <ion-input
+              [(ngModel)]="files[activeIndex].caption"
+              placeholder="Caption"
+              (input)="onTyping()"
+              fill="outline"
+              shape="round"
+              class="input"
+              mode="md"
+            >
+              <ion-button id="open-action-sheet" slot="end" fill="clear">
+                <ion-icon
+                  name="attach"
+                  slot="icon-only"
+                  class="icon"
+                ></ion-icon>
+              </ion-button>
+              <ion-action-sheet
+                trigger="open-action-sheet"
+                [buttons]="actionSheetButtons"
+                (didDismiss)="onSelect($event)"
+              ></ion-action-sheet>
+            </ion-input>
+          </div>
+          <div class="send-button-container">
+            <ion-button (click)="sendPrivateMessage()" fill="clear">
+              <ion-icon name="send" class="icon" slot="icon-only"></ion-icon>
+            </ion-button>
+          </div>
+        </div>
+      }
+    </div>
+  </ion-content>
+}

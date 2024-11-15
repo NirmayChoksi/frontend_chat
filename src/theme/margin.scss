@@ -1,0 +1,22 @@
+$margin-values: ();
+@for $i from 0 through 50 {
+  $margin-values: map-merge($margin-values, ($i: $i * 1px));
+}
+
+@each $key, $value in $margin-values {
+  .mb-#{$key} {
+    margin-bottom: $value !important;
+  }
+  .mt-#{$key} {
+    margin-top: $value !important;
+  }
+  .ml-#{$key} {
+    margin-left: $value !important;
+  }
+  .mr-#{$key} {
+    margin-right: $value !important;
+  }
+  .m-#{$key} {
+    margin: $value !important;
+  }
+}

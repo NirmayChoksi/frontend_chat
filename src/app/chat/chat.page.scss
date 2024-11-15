@@ -32,68 +32,93 @@
         }
       }
 
-      .sender-message-container,
-      .receiver-message-container {
+      .main-container {
         display: flex;
-        gap: 8px;
-        max-width: 40%;
-        .avatar-container {
-          height: 100%;
-          ion-avatar {
-            height: 30px;
-            width: 30px;
-          }
-        }
-        .chat-bubble-container {
-          width: 100%;
+        .sender-message-container,
+        .receiver-message-container {
           display: flex;
-          flex-direction: column;
-          gap: 2px;
-          .chat-bubble {
-            padding: 12px;
-            border-radius: 8px;
-            width: fit-content;
-
-            &.sender {
-              background-color: #4444a6;
-              color: white;
-            }
-
-            &.receiver {
-              background-color: #e1e1e1;
-              color: black;
+          gap: 8px;
+          max-width: 80%;
+          .avatar-container {
+            height: 100%;
+            ion-avatar {
+              height: 30px;
+              width: 30px;
             }
           }
-          .deleted-message {
-            font-style: italic;
+          .chat-bubble-container {
+            width: 100%;
             display: flex;
-            align-items: center;
-            gap: 5px;
+            flex-direction: column;
+            gap: 2px;
+            .chat-bubble {
+              padding: 12px;
+              border-radius: 8px;
+              width: fit-content;
+              max-width: 100%;
+              max-height: 300px;
+              overflow: hidden;
+              align-items: center;
+
+              &.sender {
+                background-color: #4444a6;
+                color: white;
+                align-items: end;
+              }
+
+              &.receiver {
+                background-color: #e1e1e1;
+                color: black;
+                align-items: start;
+              }
+
+              .uploaded-image {
+                height: 100%;
+                width: 100%;
+              }
+            }
+            .deleted-message {
+              font-style: italic;
+              display: flex;
+              align-items: center;
+              gap: 5px;
+            }
+            .sender-border-radius {
+              border-top-right-radius: 0;
+            }
+            .receiver-border-radius {
+              border-top-left-radius: 0;
+            }
+            .sender-info-container,
+            .receiver-info-container {
+              display: flex;
+              gap: 8px;
+            }
           }
-          .sender-border-radius {
-            border-top-right-radius: 0;
-          }
-          .receiver-border-radius {
-            border-top-left-radius: 0;
-          }
-          .sender-info-container,
-          .receiver-info-container {
+          .image-container {
             display: flex;
-            gap: 8px;
+            flex-wrap: wrap;
+            gap: 4px;
+            width: 80%;
+            height: 200px;
+            overflow: hidden;
+            img {
+              width: calc(50% - 3px);
+              height: calc(50% - 3px);
+              object-fit: cover;
+            }
           }
         }
-      }
 
-      .sender-message-container {
-        flex-direction: row-reverse;
-        margin-left: auto;
-        .sender-info-container {
+        .sender-message-container {
           flex-direction: row-reverse;
+          .sender-info-container {
+            flex-direction: row-reverse;
+          }
         }
-      }
 
-      .receiver-message-container {
-        margin-right: auto;
+        .receiver-message-container {
+        }
       }
     }
 
@@ -183,4 +208,73 @@
 
 .relative {
   position: relative;
+}
+
+.w-324 {
+  width: 324px !important;
+}
+
+.justify-content-end {
+  justify-content: end;
+}
+
+.justify-content-start {
+  justify-content: start;
+}
+
+.align-items-end {
+  align-items: end;
+}
+.align-items-start {
+  align-items: start;
+}
+
+.swiper {
+  height: calc(100vh - 56px);
+  swiper-container {
+    height: 90%;
+    swiper-slide {
+      height: 90%;
+      display: flex;
+      align-items: center;
+      .image-container {
+        max-height: 60vh;
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+        img {
+          // height: 100%;
+          // width: 100%;
+        }
+      }
+    }
+  }
+
+  .input-container {
+    display: flex;
+    width: 100%;
+    gap: 8px;
+    padding: 16px;
+
+    .chat-input {
+      width: 95%;
+
+      .input {
+        border-radius: 20px;
+        min-height: unset;
+        height: 35px;
+
+        .icon {
+        }
+      }
+    }
+
+    .send-button-container {
+      ion-button {
+        min-height: unset;
+        height: 35px;
+        margin: 0;
+      }
+    }
+  }
 }

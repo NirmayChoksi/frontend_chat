@@ -25,6 +25,18 @@
 @import "@ionic/angular/css/text-transformation.css";
 @import "@ionic/angular/css/flex-utils.css";
 
+/* Custom styles */
+@import "/src/theme/padding.scss";
+@import "/src/theme/margin.scss";
+@import "/src/theme/font.scss";
+@import "/src/theme/input.scss";
+@import "/src/theme/border-radius.scss";
+@import "/src/theme/buttons.scss";
+@import "/src/theme/width.scss";
+@import "/src/theme/height.scss";
+@import "/src/theme/flex.scss";
+@import "/src/theme/tooltip.scss";
+
 /**
  * Ionic Dark Mode
  * -----------------------------------------------------
@@ -34,4 +46,88 @@
 
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import "@ionic/angular/css/palettes/dark.system.css";
+/*@import "@ionic/angular/css/palettes/dark.system.css";*/
+
+// * {
+//   font-family: "Mulish-Regular" !important;
+// }
+
+.content-container {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+.page-container {
+  display: flex;
+  flex-direction: row-reverse;
+  width: 80%;
+  max-height: 600px;
+}
+
+.action-pointer {
+  cursor: pointer;
+}
+
+.function-icon {
+  height: 38px;
+  min-width: 38px;
+  max-width: 38px;
+  --border-radius: 6px;
+}
+
+.row {
+  display: flex;
+}
+
+.safe-padding-top {
+  padding-top: var(--ion-safe-area-top);
+}
+
+// .input-container {
+//   display: flex;
+//   gap: 4px;
+//   flex-direction: column;
+
+//   .input-label {
+//     font-size: 16px !important;
+//     color: var(--ion-text-color-light-grey) !important;
+//     line-height: 24px;
+//   }
+
+//   .input {
+//     border-radius: 10px;
+//     border: 1px solid var(--ion-input-border-color) !important;
+//     min-height: 48px !important;
+//     position: relative;
+
+//     --highlight-color-focused: none;
+//     --highlight-color-invalid: none;
+//     --highlight-color-valid: none;
+
+//     --placeholder-color: var(--ion-input-place-holder-color);
+
+//     --padding-start: 5px;
+//     --padding-end: 5px;
+//     --padding-top: 5px;
+
+//     background-color: var(--ion-input-background-color);
+//   }
+
+//   .input-select {
+//     --padding-bottom: 5px;
+//   }
+
+//   .sc-ion-input-md-h,
+//   .sc-ion-input-ios-h,
+//   .sc-ion-textarea-md-h,
+//   .sc-ion-textarea-ios-h {
+//     --border-width: 0px;
+//   }
+// }
+
+.ta-center {
+  text-align: center;
+}

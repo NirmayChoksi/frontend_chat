@@ -1,15 +1,9 @@
-import {
-  Component,
-  ElementRef,
-  inject,
-  OnInit,
-  ViewChild,
-} from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import io from 'socket.io-client';
 import { ImageUploadService } from '../services/image-upload.service';
 import { format } from 'date-fns';
-import { Platform, ToastController } from '@ionic/angular';
+import { Platform } from '@ionic/angular';
 import { Capacitor } from '@capacitor/core';
 import {
   Camera,
@@ -19,7 +13,11 @@ import {
   Photo,
 } from '@capacitor/camera';
 import { ToastService } from '../services/toast.service';
+import { register } from 'swiper/element/bundle';
+import { SwiperOptions } from 'swiper/types';
 
+// register Swiper custom elements
+register();
 export interface IActionButtonConfig {
   text: string;
   icon: string;
@@ -32,7 +30,7 @@ interface IMessage {
   to: string;
   isGroup: boolean;
   content: string;
-  imageUrls: string[];
+  imageUrl: string[];
   status: string;
   createdAt: string;
   updatedAt: string;
@@ -42,12 +40,24 @@ interface IGroupedMessage {
   [key: string]: IMessage[][];
 }
 
+interface IFile {
+  uri: string;
+  caption: string;
+}
+
+interface ISendMessagePayload {
+  uri: string | string[];
+  message?: string;
+}
+
 @Component({
   selector: 'app-chat',
   templateUrl: './chat.page.html',
   styleUrls: ['./chat.page.scss'],
 })
 export class ChatPage implements OnInit {
+  maxAttachments = 5;
+  activeIndex = 0;
   sender = '';
   receiver = '';
   socket: any;
@@ -57,7 +67,25 @@ export class ChatPage implements OnInit {
   showTyping = false;
   typingTimeout: any;
   fileType = 'image/jpeg';
-  files: string[] = [];
+  files: IFile[] = [
+    // {
+    //   // uri: 'http://192.168.1.5:8101/_capacitor_file_/data/user/0/io.ionic.starter/cache/1000000032.1731592430120.jpeg',
+    //   uri: 'https://picsum.photos/412/700',
+    //   caption: '',
+    // },
+    // {
+    //   uri: 'http://192.168.1.5:8101/_capacitor_file_/data/user/0/io.ionic.starter/cache/1000000033.1731592430174.jpeg',
+    //   caption: '',
+    // },
+    // {
+    //   uri: 'http://192.168.1.5:8101/_capacitor_file_/data/user/0/io.ionic.starter/cache/1000000034.1731592430221.jpeg',
+    //   caption: '',
+    // },
+    // {
+    //   uri: 'http://192.168.1.5:8101/_capacitor_file_/data/user/0/io.ionic.starter/cache/1000000035.1731592430271.jpeg',
+    //   caption: '',
+    // },
+  ];
   today = format(new Date(), 'yyyy-MM-dd');
   isDesktop!: boolean;
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
@@ -73,16 +101,17 @@ export class ChatPage implements OnInit {
       data: 'scan',
     },
   ];
+  @ViewChild('messagesContainer') messagesContainer!: ElementRef;
+  currentVisibleDate: string = '';
+  displayImages = false;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private imageUploadService: ImageUploadService,
     private platform: Platform,
-    private toastService: ToastService
+    private toastService: ToastService,
   ) {}
-
-  toastController = inject(ToastController);
 
   ngOnInit() {
     this.isDesktop =
@@ -124,21 +153,17 @@ export class ChatPage implements OnInit {
         data[data.length - 1].push(message);
       }
     });
-
-    console.log('groupedMessages:', this.groupedMessages);
   }
 
   initialSocket = () => {
-    this.socket = io('https://backend-chat-6wdi.onrender.com/', {
+    this.socket = io('https://backend-chat-6wdi.onrender.com', {
       query: { userId: this.sender },
     });
     // this.socket = io('http://localhost:3000/', {
     //   query: { userId: this.sender },
     // });
 
-    this.socket.on('connect', () => {
-      console.log('Connected to server', this.socket);
-    });
+    this.socket.on('connect', () => {});
 
     this.getMessages();
 
@@ -154,7 +179,7 @@ export class ChatPage implements OnInit {
 
     this.socket.on('message_deleted', (deletedMsgId: string) => {
       const deleteIndex = this.messages.findIndex(
-        (msg) => msg['_id'].toString().trim() === deletedMsgId
+        (msg) => msg['_id'].toString().trim() === deletedMsgId,
       );
       this.messages[deleteIndex].status = 'DELETED';
     });
@@ -163,9 +188,7 @@ export class ChatPage implements OnInit {
       this.showTyping = typing; //Toggles typing animation
     });
 
-    this.socket.on('disconnect', () => {
-      console.log('Disconnected from server');
-    });
+    this.socket.on('disconnect', () => {});
   };
 
   getMessages = () => {
@@ -191,27 +214,137 @@ export class ChatPage implements OnInit {
     }, 2000);
   }
 
-  sendPrivateMessage = () => {
-    if (this.message && this.files.length > 1) {
+  async sendPrivateMessage() {
+    if (!this.message && this.files.length === 0) {
+      return;
+    }
+    if (this.message) {
       this.socket.emit('send_private_message', {
         from: this.sender,
         to: this.receiver,
         content: this.message,
-        imageUrl: this.files[0],
-      }); // send private message
+        imageUrl: [],
+      });
       this.message = '';
-      this.files.splice(0, 1);
     }
-    this.socket.emit('send_private_message', {
-      from: this.sender,
-      to: this.receiver,
-      content: this.message,
-      imageUrl: this.files[0],
-    });
-    this.message = '';
-    this.files = [];
+    if (this.files.length) {
+      if (this.files.length > this.maxAttachments) {
+        this.showFileLimitToast();
+        return;
+      }
+      const payload: ISendMessagePayload[] = this.prepareImagePayload(
+        this.files,
+      );
+
+      if (!payload.length) {
+        return;
+      }
+
+      await this.uploadImagesAndSendMessage(payload);
+      this.files = [];
+    }
+
     this.onTyping();
-  };
+  }
+
+  prepareImagePayload(files: IFile[]) {
+    const payload: ISendMessagePayload[] = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+
+      if (file.caption) {
+        payload.push({ uri: file.uri, message: file.caption });
+        continue;
+      }
+      const images: string[] = [file.uri];
+      let j = i + 1;
+
+      while (j < files.length && !files[j].caption) {
+        images.push(files[j].uri);
+        j++;
+      }
+
+      if (images.length > 3) {
+        payload.push({ uri: images });
+        i = j - 1; // Skip to the next group of images
+      } else {
+        payload.push({ uri: file.uri });
+      }
+    }
+
+    return payload;
+  }
+
+  async uploadImagesAndSendMessage(payload: ISendMessagePayload[]) {
+    for (const element of payload) {
+      const uris = Array.isArray(element.uri) ? element.uri : [element.uri];
+      const files = await this.convertUriToFiles(uris);
+
+      if (files.length !== uris.length) {
+        console.error('File conversion mismatch');
+        this.showFileUploadErrorToast();
+        break;
+      }
+
+      this.uploadImages(files, element.message);
+    }
+  }
+
+  async convertUriToFiles(uris: string[]): Promise<File[]> {
+    const files: File[] = [];
+
+    const fetchPromises = uris.map(async (uri, index) => {
+      try {
+        const res = await fetch(uri);
+        const blob = await res.blob();
+
+        const fileName =
+          uri.split('/').pop()?.split('?')[0] || `image${index}.jpg`;
+
+        const file = new File([blob], fileName, { type: 'image/jpeg' });
+        files.push(file);
+      } catch (error) {
+        console.error('Error converting URI to file:', error);
+      }
+    });
+
+    await Promise.all(fetchPromises);
+    return files;
+  }
+
+  uploadImages(files: File[], message?: string) {
+    this.imageUploadService.uploadFile(files).subscribe({
+      next: (response) => {
+        if (response.files.length !== files.length) {
+          this.showFileUploadErrorToast();
+          this.deleteUploadedFiles(response.files);
+        } else {
+          this.socket.emit('send_private_message', {
+            from: this.sender,
+            to: this.receiver,
+            content: message,
+            imageUrl: response.files,
+          });
+        }
+      },
+      error: (error) => {
+        console.error('File upload failed:', error);
+        this.showFileUploadErrorToast();
+      },
+    });
+  }
+
+  deleteUploadedFiles(files: any[]) {
+    files.forEach((file) => {
+      this.imageUploadService.deleteFile(file).subscribe({
+        next: () => {},
+        error: (error) => {
+          console.error(`Failed to delete file: ${file.name}`, error);
+        },
+      });
+    });
+  }
 
   deleteMessage = (message: IMessage) => {
     // if (message.from === this.sender) {
@@ -219,15 +352,15 @@ export class ChatPage implements OnInit {
     // }
   };
 
-  private async showFileLimitToast() {
+  private showFileLimitToast() {
     this.toastService.showToast({
-      message: 'You can only upload up to 5 files.',
+      message: `You can only upload up to ${this.maxAttachments} files.`,
       duration: 2000,
       color: 'danger',
     });
   }
 
-  private async showFileUploadErrorToast() {
+  private showFileUploadErrorToast() {
     this.toastService.showToast({
       message: 'File upload failed. Please try again.',
       duration: 2000,
@@ -236,55 +369,7 @@ export class ChatPage implements OnInit {
   }
 
   private isFileLimitExceeded(newFilesCount: number): boolean {
-    return this.files.length + newFilesCount > 5;
-  }
-
-  onDropFiles(files: string[]): void {
-    if (this.isFileLimitExceeded(files.length)) {
-      this.showFileLimitToast();
-      return;
-    }
-    this.files.push(...files);
-    console.log(this.files);
-  }
-
-  onFileChange(event: Event): void {
-    const input = event.target as HTMLInputElement;
-
-    if (input && input.files) {
-      const files = Array.from(input.files);
-
-      if (files.length === 0) return;
-
-      if (this.isFileLimitExceeded(files.length)) {
-        this.showFileLimitToast();
-        return;
-      }
-
-      this.uploadFiles(files);
-    }
-  }
-
-  private uploadFiles(files: File[]): void {
-    this.imageUploadService.uploadFile(files).subscribe({
-      next: (response) => {
-        // Handle the response after successful file upload
-        if (this.isFileLimitExceeded(response.files.length)) {
-          this.showFileLimitToast();
-          return;
-        }
-        this.files.push(...response.files);
-        console.log('Uploaded files:', this.files);
-      },
-      error: (error) => {
-        console.error('File upload failed', error);
-        this.showFileUploadErrorToast();
-      },
-    });
-  }
-
-  triggerFileInput() {
-    this.fileInput.nativeElement.click();
+    return this.files.length + newFilesCount > this.maxAttachments;
   }
 
   onSelect(event: CustomEvent) {
@@ -292,94 +377,113 @@ export class ChatPage implements OnInit {
     if (!selection) {
       return;
     }
-    if (selection === 'scan') {
-      this.onPickScan();
-    } else if (selection === 'upload') {
-      this.onPickUpload();
+
+    if (!Capacitor.isPluginAvailable('Camera')) {
+      return;
+    }
+
+    Camera.checkPermissions()
+      .then((permission) => {
+        console.log('permission:', JSON.stringify(permission));
+
+        if (permission.camera === 'denied') {
+          Camera.requestPermissions()
+            .then(() => {
+              console.log('Permission granted');
+            })
+            .catch((err) => {
+              console.error('Permission denied:', err);
+              return;
+            });
+        } else {
+          console.log('Permission already granted');
+          return;
+        }
+      })
+      .catch((err) => {
+        console.error('Error checking permissions:', err);
+        return;
+      });
+
+    switch (selection) {
+      case 'scan':
+        this.onPickScan();
+        break;
+      case 'upload':
+        const limit = this.maxAttachments - this.files.length;
+        console.log('this.files.length:', this.files.length);
+        if (limit >= 1) {
+          this.onPickUpload(limit);
+        }
+        break;
+      default:
+        console.error('Invalid selection:', selection);
     }
   }
 
   onPickScan() {
-    if (!Capacitor.isPluginAvailable('Camera')) {
-      return;
-    }
     Camera.getPhoto({
-      quality: 50,
+      quality: 100,
       source: CameraSource.Camera,
       correctOrientation: true,
-      width: 92,
-      height: 69,
-      resultType: CameraResultType.DataUrl,
+      resultType: CameraResultType.Uri,
     })
-      .then((image: Photo) => {
-        if (image && image.webPath) {
-          this.uploadFilesFromUri([image.webPath]);
-        }
-      })
+      .then((image: Photo) => this.handleImageSelection(image?.webPath))
       .catch((err) => {
-        console.error(err);
+        console.error('Error selecting image from camera:', err);
       });
   }
 
-  onPickUpload() {
-    if (!Capacitor.isPluginAvailable('Camera')) {
-      return;
-    }
+  onPickUpload(limit: number) {
+    console.log('limit:', limit);
     Camera.pickImages({
       correctOrientation: true,
-      width: 92,
-      height: 69,
-      limit: 5,
-      quality: 50,
+      limit: limit,
+      quality: 100,
     })
       .then((images: GalleryPhotos) => {
         if (images && images.photos.length > 0) {
-          const imageUris = images.photos.map((image) => image.webPath);
-          // Upload selected images
-          this.uploadFilesFromUri(imageUris);
+          images.photos.forEach((image) => {
+            this.handleImageSelection(image.webPath);
+          });
+          console.log(this.files.map((f) => f.uri));
         }
       })
       .catch((err) => {
-        console.error(err);
+        console.error('Error selecting images from gallery:', err);
       });
   }
 
-  private uploadFilesFromUri(imageUris: string[]) {
-    const files: File[] = [];
+  handleImageSelection(imageUri: string | undefined) {
+    if (!imageUri) {
+      console.error('Invalid image URI');
+      return;
+    }
 
-    imageUris.forEach((uri) => {
-      // Convert the URI to a File object and add it to the upload queue
-      fetch(uri)
-        .then((res) => res.blob())
-        .then((blob) => {
-          const file = new File([blob], uri.split('/').pop() || 'image.jpg', {
-            type: 'image/jpeg',
-          });
-          files.push(file);
-          if (files.length === imageUris.length) {
-            // After collecting all files, upload them
-            this.uploadFiles(files);
-          }
-        })
-        .catch((error) => {
-          console.error('Error converting URI to file:', error);
+    if (this.isFileLimitExceeded(1)) {
+      this.showFileLimitToast();
+    } else {
+      this.files.push({ uri: imageUri, caption: '' });
+      this.setUpSwiper();
+    }
+  }
+
+  private setUpSwiper() {
+    setTimeout(() => {
+      const swiperEl = document.querySelector('swiper-container');
+      if (swiperEl) {
+        swiperEl.addEventListener('swiperslidechange', (event: any) => {
+          this.activeIndex = event.detail[0].activeIndex;
         });
-    });
+
+        swiperEl.initialize();
+      }
+    }, 100);
   }
 
-  onDelete(index: number) {
-    this.imageUploadService.deleteFile(this.files[index]).subscribe({
-      next: () => {
-        this.files.splice(index, 1);
-      },
-      error: (error) => {
-        console.error(error);
-      },
-    });
+  onDeleteImage(index: number) {
+    this.files.splice(index, 1);
   }
-
-  @ViewChild('messagesContainer') messagesContainer!: ElementRef;
-  currentVisibleDate: string = '';
 
   onScroll(event: any): void {
     const container = this.messagesContainer.nativeElement;
@@ -406,5 +510,73 @@ export class ChatPage implements OnInit {
     // Update the current visible date to the closest date above the top edge
     this.currentVisibleDate =
       closestDate === this.today ? 'Today' : closestDate;
+  }
+
+  onClose() {
+    if (this.displayImages) {
+      this.displayImages = false;
+    }
+    this.files = [];
+  }
+
+  showImages(url: string) {
+    this.displayImages = true;
+    Object.keys(this.groupedMessages).forEach((key) => {
+      this.groupedMessages[key].forEach((messageGroup) => {
+        messageGroup.forEach((message) => {
+          if (message.imageUrl.length === 1) {
+            this.files.push({
+              uri: message.imageUrl[0],
+              caption: message.content,
+            });
+          } else if (message.imageUrl.length > 3) {
+            const images = message.imageUrl.map((url) => {
+              return {
+                uri: url,
+              };
+            });
+          }
+        });
+      });
+    });
+
+    this.activeIndex = this.files.findIndex((f) => f.uri === url);
+
+    setTimeout(() => {
+      const swiperEl = document.querySelector('swiper-container');
+      if (swiperEl) {
+        // console.log('test');
+        // swiperEl.swiper?.slideTo(this.activeIndex, 1, false);
+        const params: SwiperOptions = {
+          injectStyles: [
+            `
+          .swiper-pagination-bullet {
+            width: 8px;
+            height: 8px;
+            color: #000;
+            opacity: 1;
+            background: rgba(0, 0, 0, 0.2);
+          }
+    
+          .swiper-pagination-bullet-active {
+            color: #fff;
+            background: #007aff;
+          }
+          `,
+          ],
+          initialSlide: this.activeIndex,
+          pagination: {
+            clickable: true,
+            renderBullet: function (index: number, className: string) {
+              return '<span class="' + className + '"></span>';
+            },
+          },
+        };
+
+        Object.assign(swiperEl, params);
+
+        swiperEl.initialize();
+      }
+    }, 100);
   }
 }

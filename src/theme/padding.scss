@@ -1,0 +1,30 @@
+$padding-values: ();
+@for $i from 0 through 50 {
+  $padding-values: map-merge($padding-values, ($i: $i * 1px));
+}
+
+@each $key, $value in $padding-values {
+  .pb-#{$key} {
+    padding-bottom: $value;
+  }
+  .pt-#{$key} {
+    padding-top: $value;
+  }
+  .pl-#{$key} {
+    padding-left: $value;
+  }
+  .pr-#{$key} {
+    padding-right: $value;
+  }
+  .pv-#{key} {
+    padding-top: $value;
+    padding-bottom: $value;
+  }
+  .ph-#{$key} {
+    padding-right: $value;
+    padding-left: $value;
+  }
+  .p-#{$key} {
+    padding: $value;
+  }
+}

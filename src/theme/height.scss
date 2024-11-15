@@ -1,0 +1,21 @@
+$height-values: ();
+@for $i from 0 through 500 {
+  $height-values: map-merge($height-values, ($i: $i * 1px));
+}
+
+@each $key, $value in $height-values {
+  .h-#{$key} {
+    height: $value;
+  }
+}
+
+$height-values-percent: ();
+@for $i from 0 through 100 {
+  $height-values-percent: map-merge($height-values-percent, ($i: $i * 1%));
+}
+
+@each $key, $value in $height-values-percent {
+  .hp-#{$key} {
+    height: $value;
+  }
+}
